@@ -139,6 +139,8 @@ const addUser = async(req, res, next) => {
 			res.status(400).json({ message: "Data is missing or invalid." });
 		else if(err instanceof ConflictingValueError)
 			res.status(409).json({ message: "Email is already in use." });
+		else if(err.name == "ValidationError")
+			res.status(400).json(err);
 		else {
 			console.log(`${err.name}: ${err.message}`);
 			res.sendStatus(500);
@@ -193,6 +195,8 @@ const updateUser = async(req, res, next) => {
 			res.status(404).json({ message: "Requested user not found" });
 		else if(err instanceof ConflictingValueError)
 			res.status(409).json({ message: "Email is already in use." });
+		else if(err.name == "ValidationError")
+			res.status(400).json(err);
 		else {
 			console.log(`${err.name}: ${err.message}`);
 			res.sendStatus(500);

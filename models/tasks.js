@@ -7,7 +7,10 @@ const _model = mongoose.model(
 	"tasks",
 	mongoose.Schema(
 		{
-			title: String,
+			title: {
+				type: String,
+				minLength: 1
+			},
 			description: String,
 			status: {
 				type: String,
@@ -24,7 +27,6 @@ const _model = mongoose.model(
 			},
 			dueDate: String,
 			ownerUserId: mongoose.ObjectId,
-			createdAt: String,
 		},
 		{ timestamps: true },
 	),
@@ -81,14 +83,11 @@ const makeTask = wrapReadyCheck(async data => {
 	const _id = new ObjectId();
 
 	try {
-		await _model.create({ _id, ...copyNeededKeys(data) });
+		await _model.create({ _id, ...copyNeededKeys(data) }); // Data is automatically validated against the schema
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	return _id.toString();
@@ -111,14 +110,13 @@ const updateTask = wrapReadyCheck(async(id, data) => {
 	delete cleanedData.ownerUserId;
 
 	try {
+		await new mongoose.Document(cleanedData, _model.schema).validate();
+
 		await _model.updateOne({ _id }, cleanedData);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	return await _model.findById(_id);

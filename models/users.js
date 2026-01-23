@@ -3,12 +3,20 @@ const { InvalidDataError, NotFoundError } = require("../error_types");
 
 const ObjectId = mongoose.Types.ObjectId;
 
+const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
 const _model = mongoose.model(
 	"users",
 	mongoose.Schema(
 		{
-			name: String,
-			email: String,
+			name: {
+				type: String,
+				minLength: 3
+			},
+			email: {
+				type: String,
+				validator: (value) => emailRegex.test(value),
+			},
 			password: String,
 		},
 		{ timestamps: true },
@@ -39,10 +47,7 @@ const getUserById = wrapReadyCheck(async id => {
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	if(result == null)
@@ -67,10 +72,7 @@ const userExists = wrapReadyCheck(async id => {
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	return result != null;
@@ -83,10 +85,7 @@ const getUserByEmail = wrapReadyCheck(async email => {
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	if(result == null)
@@ -102,10 +101,7 @@ const emailExists = wrapReadyCheck(async(email, excludeId = null) => {
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	return result != null && result._id.toString() != excludeId;
@@ -122,14 +118,11 @@ const addUser = wrapReadyCheck(async data => {
 	const _id = new ObjectId();
 
 	try {
-		await _model.create({ _id, ...copyNeededKeys(data) });
+		await _model.create({ _id, ...copyNeededKeys(data) }); // Data is automatically validated against the schema
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	return _id.toString();
@@ -148,15 +141,16 @@ const updateUser = wrapReadyCheck(async(id, data) => {
 	if(await _model.findById(_id) == null)
 		throw new NotFoundError();
 
+	const cleanedData = copyNeededKeys(data);
+
 	try {
-		await _model.updateOne({ _id }, copyNeededKeys(data));
+		await mongoose.Document(cleanedData, _model.schema).validate();
+
+		await _model.updateOne({ _id }, cleanedData);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
-		if(err.name == "ValidationError")
-			throw new InvalidDataError();
-		else
-			throw err;
+		throw err;
 	}
 
 	return await _model.findById(_id);

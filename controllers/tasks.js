@@ -117,6 +117,8 @@ const makeTask = async(req, res, next) => {
 			res.status(503).json({ message: "Database is not yet ready." });
 		else if(err instanceof InvalidDataError)
 			res.status(400).json({ message: "Data is missing or invalid." });
+		else if(err.name == "ValidationError")
+			res.status(400).json(err);
 		else {
 			console.log(`${err.name}: ${err.message}`);
 			res.sendStatus(500);
@@ -171,6 +173,8 @@ const updateTask = async(req, res, next) => {
 			res.status(400).json({ message: "Data is missing or invalid." });
 		else if(err instanceof NotFoundError)
 			res.status(404).json({ message: "Requested task not found." });
+		else if(err.name == "ValidationError")
+			res.status(400).json(err);
 		else {
 			console.log(`${err.name}: ${err.message}`);
 			res.sendStatus(500);
