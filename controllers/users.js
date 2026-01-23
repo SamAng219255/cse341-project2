@@ -31,7 +31,7 @@ const getUserById = async(req, res, next) => {
 		else if(err instanceof NotFoundError)
 			res.status(404).json({ message: "Requested user not found" });
 		else {
-			console.log(`${err.name}: ${err.message}`);
+			console.error(`getUserById: ${err.name}: ${err.message}`);
 			res.sendStatus(500);
 		}
 	}
@@ -67,7 +67,7 @@ const getUserByEmail = async(req, res, next) => {
 		else if(err instanceof NotFoundError)
 			res.status(404).json({ message: "Requested user not found" });
 		else {
-			console.log(`${err.name}: ${err.message}`);
+			console.error(`getUserByEmail: ${err.name}: ${err.message}`);
 			res.sendStatus(500);
 		}
 	}
@@ -94,7 +94,7 @@ const getAllUsers = async(req, res, next) => {
 		if(err instanceof DBNotReadyError)
 			res.status(503).json({ message: "Database is not yet ready." });
 		else {
-			console.log(`${err.name}: ${err.message}`);
+			console.error(`getAllUsers: ${err.name}: ${err.message}`);
 			res.sendStatus(500);
 		}
 	}
@@ -142,7 +142,7 @@ const addUser = async(req, res, next) => {
 		else if(err.name == "ValidationError")
 			res.status(400).json(err);
 		else {
-			console.log(`${err.name}: ${err.message}`);
+			console.error(`addUser: ${err.name}: ${err.message}`);
 			res.sendStatus(500);
 		}
 	}
@@ -198,7 +198,7 @@ const updateUser = async(req, res, next) => {
 		else if(err.name == "ValidationError")
 			res.status(400).json(err);
 		else {
-			console.log(`${err.name}: ${err.message}`);
+			console.error(`updateUser: ${err.name}: ${err.message}`);
 			res.sendStatus(500);
 		}
 	}
@@ -227,7 +227,7 @@ const deleteUser = async(req, res, next) => {
 		else if(err instanceof NotFoundError)
 			res.status(404).json({ message: "Requested user not found" });
 		else {
-			console.log(`${err.name}: ${err.message}`);
+			console.error(`deleteUser: ${err.name}: ${err.message}`);
 			res.sendStatus(500);
 		}
 	}

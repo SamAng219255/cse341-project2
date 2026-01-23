@@ -11,11 +11,11 @@ const _model = mongoose.model(
 		{
 			name: {
 				type: String,
-				minLength: 3
+				minLength: 3,
 			},
 			email: {
 				type: String,
-				validator: (value) => emailRegex.test(value),
+				validate: (value) => emailRegex.test(value),
 			},
 			password: String,
 		},
@@ -37,7 +37,7 @@ const getUserById = wrapReadyCheck(async id => {
 		_id = new ObjectId(id);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`getUserById/ObjectId: ${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
@@ -46,7 +46,7 @@ const getUserById = wrapReadyCheck(async id => {
 		result = await _model.findById(_id);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`getUserById/findById: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -62,7 +62,7 @@ const userExists = wrapReadyCheck(async id => {
 		_id = new ObjectId(id);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`userExists/ObjectId: ${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
@@ -71,7 +71,7 @@ const userExists = wrapReadyCheck(async id => {
 		result = await _model.findById(_id);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`userExists/findById: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -84,7 +84,7 @@ const getUserByEmail = wrapReadyCheck(async email => {
 		result = await _model.findOne({ email });
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`getUserByEmail/findOne: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -100,7 +100,7 @@ const emailExists = wrapReadyCheck(async(email, excludeId = null) => {
 		result = await _model.findOne({ email });
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`emailExists/findOne: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -121,7 +121,7 @@ const addUser = wrapReadyCheck(async data => {
 		await _model.create({ _id, ...copyNeededKeys(data) }); // Data is automatically validated against the schema
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`addUser/create: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -134,7 +134,7 @@ const updateUser = wrapReadyCheck(async(id, data) => {
 		_id = new ObjectId(id);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`updateUser/ObjectId: ${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
@@ -144,12 +144,12 @@ const updateUser = wrapReadyCheck(async(id, data) => {
 	const cleanedData = copyNeededKeys(data);
 
 	try {
-		await mongoose.Document(cleanedData, _model.schema).validate();
+		await new mongoose.Document(cleanedData, _model.schema).validate();
 
 		await _model.updateOne({ _id }, cleanedData);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`updateUser/updateOne: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -162,7 +162,7 @@ const deleteUser = wrapReadyCheck(async id => {
 		_id = new ObjectId(id);
 	}
 	catch(err) {
-		console.error(`${err.name}: ${err.message}`);
+		console.error(`deleteUser/ObjectId: ${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
