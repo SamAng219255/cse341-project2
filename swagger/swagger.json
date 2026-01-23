@@ -1,0 +1,657 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Task Tracker API",
+    "description": "Stores and displays tasks per user.",
+    "version": "1.0.0"
+  },
+  "host": "127.0.0.1:8080",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/tasks/user/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns list of tasks owned by the given user. May be empty.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "000000000000000000000000"
+                  },
+                  "title": {
+                    "type": "string",
+                    "example": "Buy groceries"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Milk, bread, eggs"
+                  },
+                  "status": {
+                    "type": "string",
+                    "example": "todo"
+                  },
+                  "priority": {
+                    "type": "number",
+                    "example": 2
+                  },
+                  "dueDate": {
+                    "type": "string",
+                    "example": "2026-01-25"
+                  },
+                  "ownerUserId": {
+                    "type": "string",
+                    "example": "65b2f9c1e4a3c9a7d8f12345"
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client provided an invalid user id."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task found and returned.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "Buy groceries"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Milk, bread, eggs"
+                },
+                "status": {
+                  "type": "string",
+                  "example": "todo"
+                },
+                "priority": {
+                  "type": "number",
+                  "example": 2
+                },
+                "dueDate": {
+                  "type": "string",
+                  "example": "2026-01-25"
+                },
+                "ownerUserId": {
+                  "type": "string",
+                  "example": "65b2f9c1e4a3c9a7d8f12345"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client provided an invalid task id."
+          },
+          "404": {
+            "description": "No task with the provided id exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "New Task Information",
+            "in": "body",
+            "description": "New value to update task record with.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Buy groceries"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Milk, bread, eggs"
+                },
+                "status": {
+                  "type": "string",
+                  "example": "todo"
+                },
+                "priority": {
+                  "type": "number",
+                  "example": 2
+                },
+                "dueDate": {
+                  "type": "string",
+                  "example": "2026-01-25"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task found and updated. The body is the new complete task record.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "Buy groceries"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Milk, bread, eggs"
+                },
+                "status": {
+                  "type": "string",
+                  "example": "todo"
+                },
+                "priority": {
+                  "type": "number",
+                  "example": 2
+                },
+                "dueDate": {
+                  "type": "string",
+                  "example": "2026-01-25"
+                },
+                "ownerUserId": {
+                  "type": "string",
+                  "example": "65b2f9c1e4a3c9a7d8f12345"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client provided an invalid task id or body."
+          },
+          "404": {
+            "description": "No task with the provided id exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Task found and deleted."
+          },
+          "400": {
+            "description": "Client provided an invalid task id."
+          },
+          "404": {
+            "description": "No task with the provided id exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    },
+    "/tasks/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "New Task Information",
+            "in": "body",
+            "description": "New value to update task record with.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Buy groceries"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Milk, bread, eggs"
+                },
+                "status": {
+                  "type": "string",
+                  "example": "todo"
+                },
+                "priority": {
+                  "type": "number",
+                  "example": 2
+                },
+                "dueDate": {
+                  "type": "string",
+                  "example": "2026-01-25"
+                },
+                "ownerUserId": {
+                  "type": "string",
+                  "example": "65b2f9c1e4a3c9a7d8f12345"
+                }
+              },
+              "required": [
+                "title",
+                "description",
+                "status",
+                "priority",
+                "dueDate",
+                "ownerUserId"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Task successfully created.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client did not provide sufficient data to create a task record or provided invalid data such as the ownerUserId not matching an existing user."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    },
+    "/users/email/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found and returned.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client provided an invalid user email."
+          },
+          "404": {
+            "description": "No user with the provided email exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found and returned.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client provided an invalid user id."
+          },
+          "404": {
+            "description": "No user with the provided id exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Updated User Information",
+            "in": "body",
+            "description": "New value to update user record with.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "hash"
+                }
+              },
+              "required": [
+                "name",
+                "email",
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found and updated.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "hash"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client provided an invalid user id or body."
+          },
+          "404": {
+            "description": "No user with the provided id exists."
+          },
+          "409": {
+            "description": "Email is already in use."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User found and deleted."
+          },
+          "400": {
+            "description": "Client provided an invalid user id."
+          },
+          "404": {
+            "description": "No user with the provided id exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    },
+    "/users/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Returns a list of all users.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "000000000000000000000000"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "New User Information",
+            "in": "body",
+            "description": "New value to update user record with.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "hash"
+                }
+              },
+              "required": [
+                "name",
+                "email",
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User successfully added.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "000000000000000000000000"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Client did not provide sufficient data to create a user record or provided invalid data."
+          },
+          "409": {
+            "description": "Email is already in use."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    }
+  }
+}

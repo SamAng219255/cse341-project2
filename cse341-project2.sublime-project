@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"build_systems": [
+		{
+			"name": "Lint",
+			"shell_cmd": "npm run lint",
+			"file_patterns": ["*.js", "*.mjs"]
+		}
+	]
+}
