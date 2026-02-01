@@ -5,10 +5,10 @@ const { DBNotReadyError, InvalidDataError, NotFoundError, ConflictingValueError 
 const getUserById = async(req, res, next) => {
 	let data;
 	try {
-		if(req.params.id == undefined)
+		if(req.params.userId == undefined)
 			throw new InvalidDataError();
 
-		data = await usersModel.getUserById(req.params.id);
+		data = await usersModel.getUserById(req.params.userId);
 	}
 	/*
 		#swagger.responses[200] = {
@@ -121,7 +121,7 @@ const addUser = async(req, res, next) => {
 	*/
 	let id;
 	try {
-		if(req.body.email && await usersModel.githubExists(req.body.email, req.params.id))
+		if(req.body.githubId && await usersModel.githubExists(req.body.githubId, req.params.id))
 			throw new ConflictingValueError();
 
 		id = await usersModel.addUser(req.body);
@@ -169,12 +169,12 @@ const updateUser = async(req, res, next) => {
 	*/
 	let data;
 	try {
-		if(req.params.id == undefined)
+		if(req.params.userId == undefined)
 			throw new InvalidDataError();
-		if(req.body.email && await usersModel.emailExists(req.body.email, req.params.id))
+		if(req.body.githubId && await usersModel.githubExists(req.body.githubId, req.params.userId))
 			throw new ConflictingValueError();
 
-		data = await usersModel.updateUser(req.params.id, req.body);
+		data = await usersModel.updateUser(req.params.userId, req.body);
 	}
 	/*
 		#swagger.responses[200] = {
@@ -214,11 +214,11 @@ const updateUser = async(req, res, next) => {
 
 const deleteUser = async(req, res, next) => {
 	try {
-		if(req.params.id == undefined)
+		if(req.params.userId == undefined)
 			throw new InvalidDataError();
 
-		await tasksModel.removeTasksByUser(req.params.id);
-		await usersModel.deleteUser(req.params.id);
+		await tasksModel.removeTasksByUser(req.params.userId);
+		await usersModel.deleteUser(req.params.userId);
 	}
 	/*
 		#swagger.responses[204] = { description: 'User found and deleted.' }
