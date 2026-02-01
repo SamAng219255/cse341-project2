@@ -29,7 +29,7 @@ passport.deserializeUser(async(userId, done) => {
 	}
 	catch(err) {
 		console.error(`deserializeUser: ${err.name}: ${err.message}`);
-		done(null, {});
+		done(null, null);
 	}
 });
 
