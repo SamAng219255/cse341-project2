@@ -5,18 +5,27 @@
     "description": "Stores and displays tasks per user.",
     "version": "1.0.0"
   },
-  "host": "127.0.0.1:8080",
+  "host": "localhost:8080",
   "basePath": "/",
   "schemes": [
     "http"
   ],
+  "securityDefinitions": {
+    "github_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://github.com/login/oauth/authorize",
+      "tokenUrl": "https://github.com/login/oauth/access_token",
+      "scopes": {}
+    }
+  },
   "paths": {
-    "/tasks/user/{id}": {
+    "/tasks/{userId}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -68,21 +77,38 @@
           "400": {
             "description": "Client provided an invalid user id."
           },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
+          },
           "500": {
             "description": "Internal Server Error"
           },
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       }
     },
-    "/tasks/{id}": {
+    "/tasks/{userId}/{taskId}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -131,6 +157,12 @@
           "400": {
             "description": "Client provided an invalid task id."
           },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
+          },
           "404": {
             "description": "No task with the provided id exists."
           },
@@ -140,13 +172,24 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       },
       "put": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -226,6 +269,12 @@
           "400": {
             "description": "Client provided an invalid task id or body."
           },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
+          },
           "404": {
             "description": "No task with the provided id exists."
           },
@@ -235,13 +284,24 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       },
       "delete": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -254,6 +314,12 @@
           "400": {
             "description": "Client provided an invalid task id."
           },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
+          },
           "404": {
             "description": "No task with the provided id exists."
           },
@@ -263,7 +329,12 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       }
     },
     "/tasks/": {
@@ -297,10 +368,6 @@
                 "dueDate": {
                   "type": "string",
                   "example": "2026-01-25"
-                },
-                "ownerUserId": {
-                  "type": "string",
-                  "example": "65b2f9c1e4a3c9a7d8f12345"
                 }
               },
               "required": [
@@ -308,8 +375,7 @@
                 "description",
                 "status",
                 "priority",
-                "dueDate",
-                "ownerUserId"
+                "dueDate"
               ]
             }
           }
@@ -333,54 +399,8 @@
           "400": {
             "description": "Client did not provide sufficient data to create a task record or provided invalid data such as the ownerUserId not matching an existing user."
           },
-          "500": {
-            "description": "Internal Server Error"
-          },
-          "503": {
-            "description": "Server still turning on and not yet connected to database."
-          }
-        }
-      }
-    },
-    "/users/email/": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User found and returned.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "example": "000000000000000000000000"
-                },
-                "name": {
-                  "type": "string",
-                  "example": "John Doe"
-                },
-                "email": {
-                  "type": "string",
-                  "example": "user@example.com"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "400": {
-            "description": "Client provided an invalid user email."
-          },
-          "404": {
-            "description": "No user with the provided email exists."
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
           },
           "500": {
             "description": "Internal Server Error"
@@ -388,15 +408,20 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       }
     },
-    "/users/{id}": {
+    "/users/{userId}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -419,6 +444,10 @@
                 "email": {
                   "type": "string",
                   "example": "user@example.com"
+                },
+                "githubId": {
+                  "type": "string",
+                  "example": "00000000"
                 }
               },
               "xml": {
@@ -429,6 +458,12 @@
           "400": {
             "description": "Client provided an invalid user id."
           },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
+          },
           "404": {
             "description": "No user with the provided id exists."
           },
@@ -438,13 +473,18 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       },
       "put": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -465,15 +505,15 @@
                   "type": "string",
                   "example": "user@example.com"
                 },
-                "password": {
+                "githubId": {
                   "type": "string",
-                  "example": "hash"
+                  "example": "00000000"
                 }
               },
               "required": [
                 "name",
                 "email",
-                "password"
+                "githubId"
               ]
             }
           }
@@ -496,9 +536,9 @@
                   "type": "string",
                   "example": "user@example.com"
                 },
-                "password": {
+                "githubId": {
                   "type": "string",
-                  "example": "hash"
+                  "example": "00000000"
                 }
               },
               "xml": {
@@ -508,6 +548,12 @@
           },
           "400": {
             "description": "Client provided an invalid user id or body."
+          },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
           },
           "404": {
             "description": "No user with the provided id exists."
@@ -521,13 +567,18 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       },
       "delete": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -540,6 +591,12 @@
           "400": {
             "description": "Client provided an invalid user id."
           },
+          "401": {
+            "description": "Attempted to access the endpoint without authenticating."
+          },
+          "403": {
+            "description": "Attempted to access the endpoint without matching authorization."
+          },
           "404": {
             "description": "No user with the provided id exists."
           },
@@ -549,7 +606,12 @@
           "503": {
             "description": "Server still turning on and not yet connected to database."
           }
-        }
+        },
+        "security": [
+          {
+            "github_auth": []
+          }
+        ]
       }
     },
     "/users/": {
@@ -574,6 +636,10 @@
                   "email": {
                     "type": "string",
                     "example": "user@example.com"
+                  },
+                  "githubId": {
+                    "type": "string",
+                    "example": "00000000"
                   }
                 }
               },
@@ -609,15 +675,15 @@
                   "type": "string",
                   "example": "user@example.com"
                 },
-                "password": {
+                "githubId": {
                   "type": "string",
-                  "example": "hash"
+                  "example": "00000000"
                 }
               },
               "required": [
                 "name",
                 "email",
-                "password"
+                "githubId"
               ]
             }
           }
@@ -649,6 +715,36 @@
           },
           "503": {
             "description": "Server still turning on and not yet connected to database."
+          }
+        }
+      }
+    },
+    "/login": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/github/callback": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }

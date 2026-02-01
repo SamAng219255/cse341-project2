@@ -9,7 +9,7 @@ const _model = mongoose.model(
 		{
 			title: {
 				type: String,
-				minLength: 1
+				minLength: 1,
 			},
 			description: String,
 			status: {
@@ -43,17 +43,19 @@ const keys = [
 
 const copyNeededKeys = oldObj => Object.fromEntries(keys.filter(key => key in oldObj).map(key => [ key, oldObj[key] ]));
 
-const getTaskById = wrapReadyCheck(async id => {
+const getTaskById = wrapReadyCheck(async(taskId, userId) => {
 	let _id;
+	let ownerUserId;
 	try {
-		_id = new ObjectId(id);
+		_id = new ObjectId(taskId);
+		ownerUserId = new ObjectId(userId);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
-	const result = await _model.findById(_id);
+	const result = await _model.findOne({ _id, ownerUserId });
 
 	if(result == null)
 		throw new NotFoundError();
@@ -61,10 +63,10 @@ const getTaskById = wrapReadyCheck(async id => {
 	return result;
 });
 
-const getTasksByUser = wrapReadyCheck(async id => {
+const getTasksByUser = wrapReadyCheck(async userId => {
 	let ownerUserId;
 	try {
-		ownerUserId = new ObjectId(id);
+		ownerUserId = new ObjectId(userId);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
@@ -93,17 +95,19 @@ const makeTask = wrapReadyCheck(async data => {
 	return _id.toString();
 });
 
-const updateTask = wrapReadyCheck(async(id, data) => {
+const updateTask = wrapReadyCheck(async(taskId, userId, data) => {
 	let _id;
+	let ownerUserId;
 	try {
-		_id = new ObjectId(id);
+		_id = new ObjectId(taskId);
+		ownerUserId = new ObjectId(userId);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
-	if(await _model.findById(_id) == null)
+	if(await _model.findOne({ _id, ownerUserId }) == null)
 		throw new NotFoundError();
 
 	const cleanedData = copyNeededKeys(data);
@@ -112,36 +116,38 @@ const updateTask = wrapReadyCheck(async(id, data) => {
 	try {
 		await new mongoose.Document(cleanedData, _model.schema).validate();
 
-		await _model.updateOne({ _id }, cleanedData);
+		await _model.updateOne({ _id, ownerUserId }, cleanedData);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
 		throw err;
 	}
 
-	return await _model.findById(_id);
+	return await _model.findOne({ _id, ownerUserId });
 });
 
-const removeTask = wrapReadyCheck(async id => {
+const removeTask = wrapReadyCheck(async(taskId, userId) => {
 	let _id;
+	let ownerUserId;
 	try {
-		_id = new ObjectId(id);
+		_id = new ObjectId(taskId);
+		ownerUserId = new ObjectId(userId);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);
 		throw new InvalidDataError();
 	}
 
-	const result = await _model.deleteOne({ _id });
+	const result = await _model.deleteOne({ _id, ownerUserId });
 
 	if(result.deletedCount < 1)
 		throw new NotFoundError();
 });
 
-const removeTasksByUser = wrapReadyCheck(async id => {
+const removeTasksByUser = wrapReadyCheck(async userId => {
 	let ownerUserId;
 	try {
-		ownerUserId = new ObjectId(id);
+		ownerUserId = new ObjectId(userId);
 	}
 	catch(err) {
 		console.error(`${err.name}: ${err.message}`);

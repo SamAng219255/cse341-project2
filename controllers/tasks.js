@@ -5,10 +5,10 @@ const { DBNotReadyError, InvalidDataError, NotFoundError } = require("../error_t
 const getTaskById = async(req, res, next) => {
 	let data;
 	try {
-		if(req.params.id == undefined)
+		if(req.params.taskId == undefined)
 			throw new InvalidDataError();
 
-		data = await tasksModel.getTaskById(req.params.id);
+		data = await tasksModel.getTaskById(req.params.taskId, req.params.userId);
 	}
 	/*
 		#swagger.responses[200] = {
@@ -26,6 +26,8 @@ const getTaskById = async(req, res, next) => {
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid task id.' }
 		#swagger.responses[404] = { description: 'No task with the provided id exists.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -45,10 +47,10 @@ const getTaskById = async(req, res, next) => {
 const getTasksByUser = async(req, res, next) => {
 	let data;
 	try {
-		if(req.params.id == undefined)
+		if(req.params.userId == undefined)
 			throw new InvalidDataError();
 
-		data = await tasksModel.getTasksByUser(req.params.id);
+		data = await tasksModel.getTasksByUser(req.params.userId);
 	}
 	/*
 		#swagger.responses[200] = {
@@ -65,6 +67,8 @@ const getTasksByUser = async(req, res, next) => {
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid user id.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -91,16 +95,15 @@ const makeTask = async(req, res, next) => {
 			$status: "todo",
 			$priority: 2,
 			$dueDate: "2026-01-25",
-			$ownerUserId: "65b2f9c1e4a3c9a7d8f12345",
 		}
 	}
 	*/
 	let id;
 	try {
-		if(!(await usersModel.userExists(req.body.ownerUserId)))
+		if(!(await usersModel.userExists(req.user.id)))
 			throw new InvalidDataError();
 
-		id = await tasksModel.makeTask(req.body);
+		id = await tasksModel.makeTask({ ownerUserId: req.user.id, ...req.body });
 	}
 	/*
 		#swagger.responses[201] = {
@@ -111,6 +114,7 @@ const makeTask = async(req, res, next) => {
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client did not provide sufficient data to create a task record or provided invalid data such as the ownerUserId not matching an existing user.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -144,10 +148,10 @@ const updateTask = async(req, res, next) => {
 	*/
 	let data;
 	try {
-		if(req.params.id == undefined)
+		if(req.params.taskId == undefined)
 			throw new InvalidDataError();
 
-		data = await tasksModel.updateTask(req.params.id, req.body);
+		data = await tasksModel.updateTask(req.params.taskId, req.params.userId, req.body);
 	}
 	/*
 		#swagger.responses[200] = {
@@ -165,6 +169,8 @@ const updateTask = async(req, res, next) => {
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid task id or body.' }
 		#swagger.responses[404] = { description: 'No task with the provided id exists.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -185,16 +191,18 @@ const updateTask = async(req, res, next) => {
 
 const removeTask = async(req, res, next) => {
 	try {
-		if(req.params.id == undefined)
+		if(req.params.taskId == undefined)
 			throw new InvalidDataError();
 
-		await tasksModel.removeTask(req.params.id);
+		await tasksModel.removeTask(req.params.taskId, req.params.userId);
 	}
 	/*
 		#swagger.responses[204] = { description: 'Task found and deleted.' }
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid task id.' }
 		#swagger.responses[404] = { description: 'No task with the provided id exists.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)

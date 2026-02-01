@@ -16,12 +16,15 @@ const getUserById = async(req, res, next) => {
 			schema: {
 				id: "000000000000000000000000",
 				name: "John Doe",
-				email: "user@example.com"
+				email: "user@example.com",
+				githubId: "00000000"
 			}
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid user id.' }
 		#swagger.responses[404] = { description: 'No user with the provided id exists.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -52,7 +55,8 @@ const getUserByEmail = async(req, res, next) => {
 			schema: {
 				id: "000000000000000000000000",
 				name: "John Doe",
-				email: "user@example.com"
+				email: "user@example.com",
+				githubId: "00000000"
 			}
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
@@ -85,7 +89,8 @@ const getAllUsers = async(req, res, next) => {
 			schema: [{
 				id: "000000000000000000000000",
 				name: "John Doe",
-				email: "user@example.com"
+				email: "user@example.com",
+				githubId: "00000000"
 			}]
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
@@ -110,13 +115,13 @@ const addUser = async(req, res, next) => {
 		schema: {
 			$name: "John Doe",
 			$email: "user@example.com",
-			$password: "hash"
+			$githubId: "00000000"
 		}
 	}
 	*/
 	let id;
 	try {
-		if(req.body.email && await usersModel.emailExists(req.body.email, req.params.id))
+		if(req.body.email && await usersModel.githubExists(req.body.email, req.params.id))
 			throw new ConflictingValueError();
 
 		id = await usersModel.addUser(req.body);
@@ -158,7 +163,7 @@ const updateUser = async(req, res, next) => {
 		schema: {
 			$name: "John Doe",
 			$email: "user@example.com",
-			$password: "hash"
+			$githubId: "00000000"
 		}
 	}
 	*/
@@ -178,13 +183,15 @@ const updateUser = async(req, res, next) => {
 				id: "000000000000000000000000",
 				name: "John Doe",
 				email: "user@example.com",
-				password: "hash"
+				githubId: "00000000"
 			}
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid user id or body.' }
 		#swagger.responses[404] = { description: 'No user with the provided id exists.' }
 		#swagger.responses[409] = { description: 'Email is already in use.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -218,6 +225,8 @@ const deleteUser = async(req, res, next) => {
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid user id.' }
 		#swagger.responses[404] = { description: 'No user with the provided id exists.' }
+		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
+		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)

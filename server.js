@@ -7,7 +7,10 @@ require("dotenv").config();
 const app = express();
 const bodyParser = require("body-parser");
 const apiRoutes = require("./routes/");
-const swaggerRoute = require("./routes/swagger");
+const swaggerRoutes = require("./routes/swagger");
+
+const passport = require("./passport");
+const session  = require("express-session");
 
 /* ***********************
  * Middleware
@@ -17,12 +20,24 @@ const swaggerRoute = require("./routes/swagger");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+// Session Middleware
+app.use(session({
+	secret: process.env.SESSION_SECRET,
+	resave: false,
+	saveUninitialized: true,
+}));
+
+// Passport (OAuth2) Middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 // CORS middleware
 app.use(cors());
 
 // Routes
 app.use(apiRoutes);
-app.use(swaggerRoute);
+app.use(swaggerRoutes);
+app.get("/", (req, res) => res.send(req.user !== undefined ? `Logged in as ${req.user.name}.` : "Logged out."));
 
 app.use(async(req, res, next) => {
 	res.status(404).json({ message: "Unknown endpoint." });

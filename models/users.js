@@ -15,9 +15,9 @@ const _model = mongoose.model(
 			},
 			email: {
 				type: String,
-				validate: (value) => emailRegex.test(value),
+				validate: value => value == null || emailRegex.test(value),
 			},
-			password: String,
+			githubId: String,
 		},
 		{ timestamps: true },
 	),
@@ -26,7 +26,7 @@ const _model = mongoose.model(
 const keys = [
 	"name",
 	"email",
-	"password",
+	"githubId",
 ];
 
 const copyNeededKeys = oldObj => Object.fromEntries(keys.filter(key => key in oldObj).map(key => [ key, oldObj[key] ]));
@@ -78,29 +78,13 @@ const userExists = wrapReadyCheck(async id => {
 	return result != null;
 });
 
-const getUserByEmail = wrapReadyCheck(async email => {
+const githubExists = wrapReadyCheck(async(githubId, excludeId = null) => {
 	let result;
 	try {
-		result = await _model.findOne({ email });
+		result = await _model.findOne({ githubId });
 	}
 	catch(err) {
-		console.error(`getUserByEmail/findOne: ${err.name}: ${err.message}`);
-		throw err;
-	}
-
-	if(result == null)
-		throw new NotFoundError();
-
-	return result;
-});
-
-const emailExists = wrapReadyCheck(async(email, excludeId = null) => {
-	let result;
-	try {
-		result = await _model.findOne({ email });
-	}
-	catch(err) {
-		console.error(`emailExists/findOne: ${err.name}: ${err.message}`);
+		console.error(`githubExists/findOne: ${err.name}: ${err.message}`);
 		throw err;
 	}
 
@@ -172,13 +156,50 @@ const deleteUser = wrapReadyCheck(async id => {
 		throw new NotFoundError();
 });
 
+const getByGitHubOrCreate = wrapReadyCheck(async(data, callback) => {
+	let result;
+	try {
+		result = await _model.findOne({ githubId: data.githubId });
+	}
+	catch(err) {
+		console.error(`getByGitHubOrCreate/findOne: ${err.name}: ${err.message}`);
+		throw err;
+	}
+
+	if(result == null) {
+		if(!keys.every(key => key in data))
+			throw new InvalidDataError();
+
+		try {
+			await _model.create({ ...copyNeededKeys(data) }); // Data is automatically validated against the schema
+		}
+		catch(err) {
+			console.error(`getByGitHubOrCreate/create: ${err.name}: ${err.message}`);
+			throw err;
+		}
+
+		try {
+			result = await _model.findOne({ githubId: data.githubId });
+		}
+		catch(err) {
+			console.error(`getByGitHubOrCreate/findOne/1: ${err.name}: ${err.message}`);
+			throw err;
+		}
+	}
+
+	if(callback)
+		callback(null, result);
+
+	return result;
+});
+
 module.exports = {
 	getUserById,
 	userExists,
-	getUserByEmail,
-	emailExists,
+	githubExists,
 	getAllUsers,
 	addUser,
 	updateUser,
 	deleteUser,
+	getByGitHubOrCreate,
 };
