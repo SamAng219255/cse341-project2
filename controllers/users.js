@@ -41,43 +41,6 @@ const getUserById = async(req, res, next) => {
 	res.status(200).json(data);
 };
 
-const getUserByEmail = async(req, res, next) => {
-	let data;
-	try {
-		if(req.query.email == undefined)
-			throw new InvalidDataError();
-
-		data = await usersModel.getUserByEmail(req.query.email);
-	}
-	/*
-		#swagger.responses[200] = {
-			description: 'User found and returned.',
-			schema: {
-				id: "000000000000000000000000",
-				name: "John Doe",
-				email: "user@example.com",
-				githubId: "00000000"
-			}
-		}
-		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
-		#swagger.responses[400] = { description: 'Client provided an invalid user email.' }
-		#swagger.responses[404] = { description: 'No user with the provided email exists.' }
-	*/
-	catch(err) {
-		if(err instanceof DBNotReadyError)
-			res.status(503).json({ message: "Database not yet ready." });
-		else if(err instanceof InvalidDataError)
-			res.status(400).json({ message: "Data is missing or invalid." });
-		else if(err instanceof NotFoundError)
-			res.status(404).json({ message: "Requested user not found" });
-		else {
-			console.error(`getUserByEmail: ${err.name}: ${err.message}`);
-			res.sendStatus(500);
-		}
-	}
-	res.status(200).json(data);
-};
-
 const getAllUsers = async(req, res, next) => {
 	let data;
 	try {
@@ -135,7 +98,7 @@ const addUser = async(req, res, next) => {
 		}
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client did not provide sufficient data to create a user record or provided invalid data.' }
-		#swagger.responses[409] = { description: 'Email is already in use.' }
+		#swagger.responses[409] = { description: 'GitHub id is already associated with another account.' }
 	*/
 	catch(err) {
 		if(err instanceof DBNotReadyError)
@@ -143,7 +106,7 @@ const addUser = async(req, res, next) => {
 		else if(err instanceof InvalidDataError)
 			res.status(400).json({ message: "Data is missing or invalid." });
 		else if(err instanceof ConflictingValueError)
-			res.status(409).json({ message: "Email is already in use." });
+			res.status(409).json({ message: "GitHub id is already associated with another account." });
 		else if(err.name == "ValidationError")
 			res.status(400).json(err);
 		else {
@@ -189,7 +152,7 @@ const updateUser = async(req, res, next) => {
 		#swagger.responses[503] = { description: 'Server still turning on and not yet connected to database.' }
 		#swagger.responses[400] = { description: 'Client provided an invalid user id or body.' }
 		#swagger.responses[404] = { description: 'No user with the provided id exists.' }
-		#swagger.responses[409] = { description: 'Email is already in use.' }
+		#swagger.responses[409] = { description: 'GitHub id is already associated with another account.' }
 		#swagger.responses[401] = { description: 'Attempted to access the endpoint without authenticating.' }
 		#swagger.responses[403] = { description: 'Attempted to access the endpoint without matching authorization.' }
 	*/
@@ -201,7 +164,7 @@ const updateUser = async(req, res, next) => {
 		else if(err instanceof NotFoundError)
 			res.status(404).json({ message: "Requested user not found" });
 		else if(err instanceof ConflictingValueError)
-			res.status(409).json({ message: "Email is already in use." });
+			res.status(409).json({ message: "GitHub id is already associated with another account." });
 		else if(err.name == "ValidationError")
 			res.status(400).json(err);
 		else {
@@ -240,12 +203,19 @@ const deleteUser = async(req, res, next) => {
 			res.sendStatus(500);
 		}
 	}
+	try {
+		req.logout(function(err) {
+			if(err) return next(err);
+		});
+	}
+	finally {
+		req.session.destroy();
+	}
 	res.sendStatus(204);
 };
 
 module.exports = {
 	getUserById,
-	getUserByEmail,
 	getAllUsers,
 	addUser,
 	updateUser,

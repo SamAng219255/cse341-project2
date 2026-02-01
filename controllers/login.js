@@ -3,7 +3,7 @@ const passport = require("../passport");
 const login = [
 	passport.authenticate("github"),
 	(req, res, next) => {
-		const refererUrl = req.headers['referer'] || req.headers['referrer'];
+		const refererUrl = req.headers["referer"] || req.headers["referrer"];
 
 		if(refererUrl)
 			req.session.loginReferer = refererUrl;
@@ -11,7 +11,7 @@ const login = [
 			req.session.loginReferer = null;
 
 		next();
-	}
+	},
 ];
 
 const logout = (req, res, next) => {
